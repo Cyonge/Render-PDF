@@ -1,6 +1,5 @@
 const fs = require("fs");
 const inquirer = require("inquirer");
-const util = require("util");
 const axios = require("axios");
 const pdf = require('html-pdf');
 
@@ -34,15 +33,21 @@ inquirer
         Promise.all([promise1, promise2])
             .then(function (res) {
                 const pdfInfo = {
-                    "profile": res[0].data.name,
-                    "profilePic": res[0].data.avatar_url,
-
+                    'profile': username,
+                    'profilePic': res[0].data.avatar_url,
+                    'location': res[0].data.location,
+                    'html': res[0].data.html_url,
+                    'blog': res[0].data.blog,
+                    'repos': res[0].data.public_repos,
+                    'followers': res[0].data.followers,
+                    'following': res[0].data.following,
 
                 };
+                
                 let stargazers = 0;
                 res[1].data.forEach(y => stargazers += y.stargazers_count);
 
-                function makeHtml(res){
+                function makeHtml(res) {
                     return `
                     <!DOCTYPE html>
                     <html lang="en">
@@ -57,42 +62,56 @@ inquirer
                     
                     <body>
                         <div class="jumbotron">
-                            <h1 class="display-4">Hi, my name is ${username}!</h1>
-                            <p class="lead">I am from ${res.location}</p>
+                            <h1 class="display-4">Hi, my name is Christian Yonge!</h1>
+                            <p class="lead">I write code and teach people how to code!</p>
+                            <p class="lead">I am from ${pdfInfo.location}</p>
+                            <a href="https://github.com/Cyonge">
+                            <img src="${pdfInfo.profilePic}" alt="Profile Picture" class="img-thumbnail" 
+                            style = 
+                                "border-radius: 50%;
+                                height : 200px; 
+                                width : 200px;
+                                border: 8px solid yellow;
+                                box-shadow: 10px 5px 5px black;
+                                margin: 30px;
+                                "></a>
                             <hr class="my-4">
                             
-                    
+                            <h3 class="info">Additonal Details Below:</h3>
                             <ul class="list-group">
-                                <li class="list-group-item">Github Username: ${res.username}</li>
-                                <li class="list-group-item">Linkedin Link: ${res.profile}</li>
-                                <li class="list-group-item">Ima slam some ${res.profilePic}</li>
+                                <li class="list-group-item">Github Username: ${username}</li>
+                                <li class="list-group-item">Blog: ${pdfInfo.blog}</li>
+                                <li class="list-group-item">Profile: ${pdfInfo.html}</li>
+                                <li class="list-group-item"># of Repos: ${pdfInfo.repos}</li>
+                                <li class="list-group-item">Github Stars: ${stargazers}</li>
+                                <li class="list-group-item">Followers: ${pdfInfo.followers}</li>
+                                <li class="list-group-item">Following: ${pdfInfo.following}</li>
+                                
+
                             </ul>
                             <hr class="my-4">
                             <!-- This line below would link to contact page -->
                             <a class="btn btn-primary btn-lg" href="#" role="button">Contact Me</a>
                         </div>
-                        <div>
-                        <h2>Github Stars:</h2>
-                        <h2>${stargazers}</h2>
-                    </div>
+                        
                     </body>
                     
-                    </html>)
+                    </html>
                     `;
-                     
+
                 }
-                
+
                 console.log(stargazers)
 
                 console.log(res);
                 console.log(pdfInfo);
 
+
                 
-                var options = { format: 'Letter' };
 
 
                 // get rid of 'options' here +==================================================
-                pdf.create(makeHtml(res), options).toFile('Profile.pdf', function (err, res) {
+                pdf.create(makeHtml(res)).toFile('Resume.pdf', function (err, res) {
                     if (err) return console.log(err);
                     console.log(res); // { filename: '/app/businesscard.pdf' }
                 });
@@ -109,25 +128,3 @@ inquirer
 
             });
     });
-
-    // });
-
-
-
-// const generateHTML = () => {
-
-
-// }
-
-
-// * Profile image 
-// *  
-// * Links to the following:
-//   * User location via Google Maps
-//   * User GitHub profile
-//   * User blog
-// * User bio
-// * Number of public repositories 
-// * Number of followers
-// * Number of GitHub stars
-// * Number of users following
